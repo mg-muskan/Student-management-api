@@ -3,6 +3,7 @@ package com.starter.springboot.service.impl;
 import com.starter.springboot.dto.AddStudentRequestDTO;
 import com.starter.springboot.dto.StudentDTO;
 import com.starter.springboot.entity.Student;
+import com.starter.springboot.exception.StudentNotFoundException;
 import com.starter.springboot.repository.StudentRepository;
 import com.starter.springboot.service.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDTO getStudentById(Long id) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found with id " + id));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
         // Instead of stream using modelMapper
         return modelMapper.map(student, StudentDTO.class);
     }
@@ -46,21 +47,21 @@ public class StudentServiceImpl implements StudentService {
     public void deleteStudent(Long id) {
 //        studentRepository.delete(studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not dounf with id " + id)));
         if (!studentRepository.existsById(id)) {
-            throw new IllegalArgumentException("Student does not exist for id " + id);
+            throw new StudentNotFoundException(id);
         }
         studentRepository.deleteById(id);
     }
 
     @Override
     public StudentDTO updateStudent(Long id, AddStudentRequestDTO addStudentRequestDTO) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found with id " + id));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
         modelMapper.map(addStudentRequestDTO, student);
         return modelMapper.map(studentRepository.save(student), StudentDTO.class);
     }
 
     @Override
     public StudentDTO updatePatchStudent(Long id, Map<Object, Object> updates) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found with id " + id));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
         updates.forEach((key, value) -> {
             if (key.equals("name")) {
                 student.setName(value.toString());
